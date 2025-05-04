@@ -1,5 +1,5 @@
 const taskDb = require('../db');
-const utils = require('../../utils')
+const utils = require('../../utils');
 
 // Get all tasks
 module.exports.getTasksList = (searchQuery) => {

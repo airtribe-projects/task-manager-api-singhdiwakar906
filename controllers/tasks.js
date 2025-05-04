@@ -1,6 +1,6 @@
 const taskManager = require('../data/managers/tasks');
 
-module.exports.getTasksList = async (req, resp) => {
+module.exports.getTasksList = async (req, res) => {
     try {
         const params = req.query
         const searchQuery = {}
@@ -8,15 +8,14 @@ module.exports.getTasksList = async (req, resp) => {
             searchQuery.completed = params.completed == 'true' ? true : false
         }
         const tasks = await taskManager.getTasksList(searchQuery)
-        // return resp.status(200).json({ success: true, data: tasks });
-        return resp.status(200).json(tasks);
+        return res.status(200).json(tasks);
     } catch (error) {
         console.error('Error fetching tasks:', error);
-        return resp.status(500).json({ success: false, message: 'Failed to fetch tasks' })
+        return res.status(500).json({ success: false, message: 'Failed to fetch tasks' })
     }
 };
 
-module.exports.getTaskByPriority = async (req, resp) => {
+module.exports.getTaskByPriority = async (req, res) => {
     try {
         const params = req.params
         const searchQuery = {}
@@ -24,42 +23,40 @@ module.exports.getTaskByPriority = async (req, resp) => {
             searchQuery.priority = params.level
         }
         const tasks = await taskManager.getTasksList(searchQuery)
-        // return resp.status(200).json({ success: true, data: tasks });
-        return resp.status(200).json(tasks);
+        return res.status(200).json(tasks);
     } catch (error) {
         console.error('Error fetching tasks:', error);
-        return resp.status(500).json({ success: false, message: 'Failed to fetch tasks' })
+        return res.status(500).json({ success: false, message: 'Failed to fetch tasks' })
     }
 };
 
-module.exports.getTaskDetails = async (req, resp) => {
+module.exports.getTaskDetails = async (req, res) => {
     try {
         const params = req.params
 
-        if (!params.id) return resp.status(400).json({ status: false, message: "request data missing" })
+        if (!params.id) return res.status(400).json({ status: false, message: "request data missing" })
         const searchQuery = { id: parseInt(params.id) }
         const taskDetails = await taskManager.getTaskDetails(searchQuery)
         if (!taskDetails) {
-            return resp.status(404).json({ success: false, message: 'Task not found' });
+            return res.status(404).json({ success: false, message: 'Task not found' });
         }
-        // return resp.status(200).json({ success: true, data: taskDetails });
-        return resp.status(200).json(taskDetails);
+        return res.status(200).json(taskDetails);
     } catch (error) {
         console.error('Error fetching tasks:', error);
-        return resp.status(500).json({ success: false, message: 'Failed to fetch tasks' })
+        return res.status(500).json({ success: false, message: 'Failed to fetch tasks' })
     }
 };
 
-module.exports.createTask = async (req, resp) => {
+module.exports.createTask = async (req, res) => {
     try {
         const params = req.body
 
         if (!params.title || !params.description || !params.hasOwnProperty('completed'))
-            return resp.status(400).json({ status: false, message: "request data missing" })
+            return res.status(400).json({ status: false, message: "request data missing" })
 
         //type checks
         if ( typeof params.title !== 'string' || typeof params.description !== 'string' || typeof params.completed !== 'boolean') {
-            return resp.status(400).json({ success: false, message: "Invalid request body. Ensure title/description are strings and completed is a boolean." });
+            return res.status(400).json({ success: false, message: "Invalid request body. Ensure title/description are strings and completed is a boolean." });
         }
 
         const payload = {
@@ -70,31 +67,30 @@ module.exports.createTask = async (req, resp) => {
         }
         
         const task = await taskManager.createTask(payload);
-        // return resp.status(201).json({ success: true, message: "Task created successfully", data: task });
-        return resp.status(201).json(task);
+        return res.status(201).json(task);
     } catch (error) {
         console.error('Error fetching tasks:', error);
-        resp.status(500).json({ success: false, message: 'Failed to fetch tasks' })
+        res.status(500).json({ success: false, message: 'Failed to fetch tasks' })
     }
 };
-module.exports.updateTask = async (req, resp) => {
+module.exports.updateTask = async (req, res) => {
     try {
         const id = parseInt(req.params.id)
         const params = req.body
         if (!id || !params.title || !params.description || !params.hasOwnProperty('completed')){
-            return resp.status(400).json({ status: false, message: "request data missing" })
+            return res.status(400).json({ status: false, message: "request data missing" })
         }
 
         //type checks
         if ( typeof params.title !== 'string' || typeof params.description !== 'string' || typeof params.completed !== 'boolean') {
-            return resp.status(400).json({ success: false, message: "Invalid request body. Ensure title/description are strings and completed is a boolean." });
+            return res.status(400).json({ success: false, message: "Invalid request body. Ensure title/description are strings and completed is a boolean." });
         }
 
         const searchQuery = { 
             id
         }
         const task = await taskManager.getTaskDetails(searchQuery)
-        if (!task) return resp.status(404).json({ success: false, message: 'Task not found' });
+        if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
 
         const payload = {
             id: id,
@@ -104,30 +100,29 @@ module.exports.updateTask = async (req, resp) => {
             priority: params.priority || 'low'
         }
         const updatedTask = await taskManager.updateTask(payload)
-        // return resp.status(200).json({ success: true, message: "Task updated successfully", data: updatedTask });
-        return resp.status(200).json(updatedTask);
+        return res.status(200).json(updatedTask);
     } catch (error) {
         console.error('Error updating task:', error);
-        return resp.status(500).json({ success: false, message: 'Failed to update task' })
+        return res.status(500).json({ success: false, message: 'Failed to update task' })
     }
 };
 
-module.exports.deleteTask = async (req, resp) => {
+module.exports.deleteTask = async (req, res) => {
     try {
         const params = req.params
-        if (!params.id) return resp.status(400).json({ status: false, message: "request data missing" })
+        if (!params.id) return res.status(400).json({ status: false, message: "request data missing" })
 
         const searchQuery = { 
             id: parseInt(params.id)
         }
         const task = await taskManager.getTaskDetails(searchQuery)
-        if (!task) return resp.status(404).json({ success: false, message: 'Task not found' });
+        if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
 
         await taskManager.deleteTask(searchQuery)
-        return resp.status(200).json({ success: true, message: 'Task deleted successfully' });
+        return res.status(200).json({ success: true, message: 'Task deleted successfully' });
     } catch (error) {
-        console.error('Error fetching tasks:', error);
-        return resp.status(500).json({ success: false, message: 'Failed to fetch tasks' })
+        console.error('Error deleting tasks:', error);
+        return res.status(500).json({ success: false, message: 'Failed to fetch tasks' })
     }
 };
 
